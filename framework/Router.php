@@ -2,6 +2,9 @@
 
 namespace App\Framework;
 
+use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
 use App\Framework\Route;
 use App\Framework\Request;
 use App\Framework\RouteCollection;
@@ -58,6 +61,23 @@ class Router
                 if (empty($route->getFinalAttributes())) {
                     return new Response("Manque d'argument");
                 }
+                $fct = new ReflectionMethod($route->getController(), $name);
+                $num = $fct->getNumberOfParameters();
+                $typePara = $fct->getParameters();
+
+                $functionName = ucFirst($typePara[1]->getName());
+
+                //$reflectionClass = new ReflectionClass($route->getController());
+
+                //faire en sorte qu'on est pas obligé d'ajouter \App\Method\\ pour l'injection de dépendance et si possible d'en avoir plusieurs
+
+                $functionName = '\App\Method\\' . $functionName;
+
+                if ($num >= 2) {
+
+                    return $controller->$name($route->getFinalAttributes(), new $functionName);
+                }
+
                 return $controller->$name($route->getFinalAttributes());
                 //$controller = $route->getController();
             }
